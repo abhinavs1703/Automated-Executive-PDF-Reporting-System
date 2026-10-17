@@ -1,32 +1,40 @@
-# ExecuBrief — Final Release Candidate Status
+# ExecuBrief — No-card cloud release status
 
 Updated: 2026-10-17
 
-## Completed in this release candidate
+## Changes included in this archive
 
-- Rechecked and consolidated the Phase 1 auth/organisation foundation and Phase 2 custom CSV/PDF workflow.
-- Fixed the browser test's required organisation field, correct post-registration route and report-history UUID selector (`.report-created` instead of the title element).
-- Public top bar: right-aligned sign-in/account actions; signed-in account menu shows identity, organisation, workspace and sign-out.
-- Public Overview: 7/30/90-day presets, product search/category/sort, report search/status filters, responsive styling and reduced-motion-aware transitions.
-- Organisation workspace: 7/30/90-day periods, validated date picker, category/region server-side filters applied consistently to overview analytics and generated workspace PDFs, import history search/status filters and import health.
-- More conservative `.gitignore` rules covering `.env`, local SQLite stores and sidecars, generated PDFs, runtime storage, dependencies and local editor artifacts.
-- Render Blueprint stores all SQLite databases, organisation imports, and generated report paths under the explicit persistent `/var/data` mount; false environment values are serialized as strings.
-- Added `docs/FINAL_RELEASE_GUIDE.md` with test steps, local acceptance criteria, GitHub safety workflow, Render persistence/cost notes, Google OAuth setup and a LinkedIn post draft.
+- Added a cloud runtime entry point while preserving local SQLite mode (`npm start`). The cloud release uses `npm run start:cloud`.
+- Added `src/cloud-store.js` to access Supabase PostgREST and private Storage with a server-side Supabase secret key.
+- Added `src/cloud-workspace.js` to reconstruct organisation analytics from private CSV objects into in-memory SQLite, with a small TTL/LRU cache, 20-import/50,000-row caps and cache invalidation after successful imports.
+- Added `src/cloud-app.js` and `src/cloud-server.js` for account/session/CSRF routes, optional Google OAuth, CSV preview/import, organisation analytics, custom PDF generation/history and private PDF downloads.
+- Added `supabase/migrations/0001_execubrief_cloud.sql` for private organisation/auth/import/report tables, service-role-only RPC functions and the private `execubrief-private` bucket.
+- Replaced the paid Render Blueprint configuration with a free Node service, `/health`, cloud start command, no persistent-disk section and server-side Supabase env placeholders.
+- Added `docs/FREE_DEPLOYMENT_NO_CARD.md` and updated README, setup and deployment docs to explain the strict $0 path and its limits.
+- Strengthened ambiguous-write cleanup so an uncertain remote timeout does not destroy a file that may already have a durable metadata record.
+- Fixed PDF temp-directory creation for a fresh/ephemeral Render instance before calling `mkdtemp`.
+- `/ready` now checks both PostgREST database access and the configured private Storage bucket.
+- Updated Supabase secret-key requests to use modern `sb_secret_*` values on `apikey` only, retaining an opt-in legacy `service_role` JWT fallback.
 
-## Tests actually run
+## Actual checks completed for this cloud change
 
-- Individual file runs cover the 31 `test/*.test.js` files: **225 passed, 0 failed, 1 skipped**.
-- The skipped test is the interactive browser flow in this isolated sandbox, where Chrome was blocked from navigating to the loopback application. Actual Puppeteer rendering and PDF-layout tests passed with `/usr/bin/chromium` and `PUPPETEER_NO_SANDBOX=true`.
-- JavaScript syntax checks pass for application, scripts, frontend, tests and legacy compatibility scripts.
-- The `npm audit` command was attempted but could not reach the registry (`EAI_AGAIN registry.npmjs.org`). Dependency advisory status remains unverified.
-- The aggregate suite can stall during browser process teardown in this sandbox. Individual test files were run and their summaries aggregated rather than misrepresenting the outer wrapper timeout as a successful single invocation.
+- `node --check` passed for `src/cloud-app.js`, `src/cloud-store.js`, `src/cloud-workspace.js` and `src/cloud-server.js`; a broader syntax pass over the project also passed before the latest docs edits.
+- `node --test test/cloud-store.test.js test/cloud-deployment-contract.test.js`: **10 passed, 0 failed**.
+- The test suite checks the source/deployment contract and store helper with fake HTTP responses; it does not substitute for a live Supabase or Render integration test.
 
-## Not done / still needs human-account access
+## Blockers / limitations
 
-- No GitHub commit or push: this build workspace is not a Git checkout, GitHub CLI is unavailable, and the connector's repository actions are not exposed in this session. Do not infer success from the release ZIP.
-- No Render service or paid resources created.
-- No actual Google OAuth round trip with user credentials.
-- No LinkedIn post published; the release guide contains a template and instructs to substitute only verified links.
-- No independent security penetration test or production data backup/restore exercise.
+- `npm ci` could not finish in this build environment because registry access timed out; the generated `node_modules` tree is incomplete and excluded from the package. A full test suite was **not** run against this exact cloud release. The focused tests use Node built-ins and mocks only.
+- The Supabase SQL migration has not been applied to a real project. Cloud register/login, RPC permissions, private bucket setup, CSV round-trips and PDF storage need a real no-card acceptance run.
+- Render has not been deployed; there is no verified public URL. Google OAuth and live browser navigation remain unverified.
+- Free-tier limits: Render sleeps after inactivity and has ephemeral local storage; Supabase Free is limited to 500 MB database and 1 GB file storage and can pause after about a week inactive. Public synthetic-demo cache/history may reset. This is a portfolio demo, not guaranteed always-on production hosting.
+- No provider account, external service, payment method or paid resource was created by this work.
 
-Follow `docs/FINAL_RELEASE_GUIDE.md` for the local, GitHub, and deploy workflows.
+## Next exact actions
+
+1. Extract/merge the release source into the authorised GitHub checkout without `.env`, databases, PDFs or `node_modules`.
+2. Run `npm ci` and `npm test` on Node 24.21.0 with network access; fix any failures.
+3. Create a Supabase Free project only if it does not ask for payment, run the migration SQL, and verify tables/bucket.
+4. Connect the repository to Render New → Blueprint. Confirm the service is **Free**, `npm run start:cloud`, `/health`, and no `disk:`. Stop if payment details or a nonzero service is required.
+5. Enter only the Supabase Project URL and Supabase secret key into Render's server environment settings. Never commit or paste the service key.
+6. Complete and record the entire cloud acceptance checklist in `docs/FREE_DEPLOYMENT_NO_CARD.md` before sharing the URL.

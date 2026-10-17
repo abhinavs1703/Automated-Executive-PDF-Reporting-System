@@ -11,7 +11,7 @@ This guide is for the release candidate in this archive. It is deliberately cons
 - Organisation CSV import history, row/date-range preview, deduplication/validation, cumulative imports, 7/30/90 date presets, category and region analytics filters, business signals and organisation-level report generation.
 - One-file Custom PDFs flow, report history, real Puppeteer PDF output, inline preview and download.
 - Express health route, separated synthetic demo storage, private reporting routes, rate limiting and concurrency controls.
-- Windows-friendly npm scripts, Node test suite, GitHub Actions workflow and native Node.js Render Blueprint.
+- Windows-friendly npm scripts, Node test suite, GitHub Actions workflow and a separate no-card Render Free + Supabase Free deployment mode.
 
 The demo dataset in `examples/enterprise-demo.csv` is synthetic. Do not use it as evidence of real commercial performance.
 
@@ -115,19 +115,20 @@ If `git ls-remote` returns refs, the remote already has history. Do **not** forc
 
 If GitHub CLI/authentication is unavailable, connect GitHub in your client or authenticate Git locally; do not paste tokens into chat. Verify the commit SHA and remote after pushing. The supplied ZIP itself is not a Git repository and contains no original history.
 
-## 7. Render native Node.js deployment
+## 7. Free cloud deployment without a payment card
 
-The included `render.yaml` is deployment preparation; it does not create a service by itself. Do not select **Apply/Create** until you have approved the current monthly cost shown by Render.
+The root `render.yaml` in this release is the no-card/free profile: `plan: free`, `startCommand: npm run start:cloud`, health check `/health`, and no persistent disk. It requires a Supabase Free project because Render Free does not preserve local filesystem changes. Do not use old copies of `render.yaml` that specify `plan: 1c-2g` or a disk.
 
-1. Push the reviewed source (without secrets/DBs/report files) to the authorised GitHub repository.
-2. In Render, choose **New → Blueprint** and connect only that repository. Review `render.yaml`, runtime, build command (`npm ci`), start command (`npm start`), health path (`/health`) and the persistent disk before applying.
-3. The blueprint mounts persistent storage at `/var/data` and points these paths into it: private DB/reports, auth database, organisation custom-data root, demo database and demo reports. Do not change these back to ephemeral project-relative paths in production.
-4. The blueprint generates `API_AUTH_TOKEN`, disables email and scheduling, and sets `PUPPETEER_NO_SANDBOX=true` for headless container rendering. Validate that Puppeteer/Chrome starts on the actual selected image. Do not assume a successful local Windows render proves the Render browser runtime works.
-5. Once Render creates the actual hostname, configure Google OAuth callback/origins and other secrets in Render's environment settings, not in source files.
-6. Verify the actual public homepage, `/health`, account registration/login, CSV import, analytics filters, PDF generation, preview/download, authentication, a second organisation's isolation, and persistence across a controlled restart/redeploy. Inspect logs for secrets/path disclosure.
-7. Test backup/restore of persistent data before using real records. One SQLite-backed instance and its persistent disk are a simple demo deployment, not a high-availability multi-instance architecture.
+1. Push this release, including `src/cloud-app.js`, `src/cloud-server.js`, `src/cloud-store.js`, `src/cloud-workspace.js`, and `supabase/migrations/0001_execubrief_cloud.sql`, to the authorised GitHub repository.
+2. Create a Supabase Free project and run the full migration once in the Supabase SQL Editor. Confirm the tables and private `execubrief-private` storage bucket exist.
+3. In Render, choose New → Blueprint and select the authorised repository/branch. Confirm the proposed service is Free and no paid resource is requested.
+4. Enter `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in Render service environment settings only. Never expose the service key in browser code or GitHub.
+5. Verify `/health` and `/ready`, then test registration/login, a synthetic CSV import, organisation analytics and filters, real PDF generation, preview/download, and cross-organisation isolation. Use only synthetic data during acceptance.
+6. Test again after the service has slept and awakened. Supabase Free may pause after approximately a week of inactivity; resume it from the Supabase dashboard if required.
 
-The current Blueprint selects a `1c-2g` paid service and a 1 GB disk. Render's published compute table currently lists `1c-2g` at approximately **US$25/month**, and persistent disks at **US$0.25/GB/month**. With a 1 GB disk, the approximate compute+disk total is **US$25.25/month**, before workspace-plan fees, outbound bandwidth beyond included usage, taxes, or other charges. Verify the complete current price in Render immediately before creating resources. Free instances spin down and do not provide persistent disks suitable for preserving SQLite/PDF data. Do not activate paid hosting without explicit budget approval.
+The detailed setup, including SQL migration checks and troubleshooting, is in [`FREE_DEPLOYMENT_NO_CARD.md`](FREE_DEPLOYMENT_NO_CARD.md).
+
+This is a $0 portfolio demo, **not guaranteed always-on hosting**: Render Free sleeps after 15 minutes idle and uses an ephemeral filesystem; Supabase Free has 500 MB of database and 1 GB of file storage and can pause after inactivity. The cloud mode stores private organisation accounts/imports/PDFs in Supabase, caches rehydrated analytics databases briefly in memory, and allows the synthetic demo history to reset. PDF rendering may hit free CPU/RAM limits. If either provider asks for card details, verification hold, or paid upgrade, stop without proceeding. No external deployment has been performed or verified by this archive alone.
 
 ## 8. LinkedIn portfolio post
 

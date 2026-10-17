@@ -1,15 +1,14 @@
+# Zero-card/zero-payment deployment profile. Render Free has an ephemeral filesystem;
+# all organisation accounts/imports/PDFs are stored in Supabase. Public synthetic demo
+# data and demo report history live under /tmp and may reset after sleep/redeploy.
 services:
   - type: web
     name: execubrief
     runtime: node
-    plan: 1c-2g
+    plan: free
     buildCommand: npm ci
-    startCommand: npm start
+    startCommand: npm run start:cloud
     healthCheckPath: /health
-    disk:
-      name: execubrief-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
@@ -17,21 +16,31 @@ services:
         value: 0.0.0.0
       - key: API_AUTH_TOKEN
         generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: execubrief-private
       - key: DATABASE_PATH
-        value: /var/data/private-report.db
+        value: /tmp/execubrief-private/report.db
       - key: REPORTS_DIR
-        value: /var/data/private-reports
+        value: /tmp/execubrief-private/reports
       - key: AUTH_DATABASE_PATH
-        value: /var/data/auth.sqlite
+        value: /tmp/execubrief-private/auth.sqlite
       - key: CUSTOM_DATA_DIR
-        value: /var/data/custom-data
+        value: /tmp/execubrief-private/custom-data
       - key: DEMO_DATABASE_PATH
-        value: /var/data/demo-report.db
+        value: /tmp/execubrief-demo/demo-report.db
       - key: DEMO_REPORTS_DIR
-        value: /var/data/demo-reports
+        value: /tmp/execubrief-demo/reports
       - key: ENABLE_SCHEDULER
         value: "false"
       - key: EMAIL_ENABLED
         value: "false"
       - key: PUPPETEER_NO_SANDBOX
         value: "true"
+      - key: IMPORT_MAX_FILE_MB
+        value: "5"
+      - key: IMPORT_MAX_ROWS
+        value: "50000"

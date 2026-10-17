@@ -489,3 +489,9 @@ CI (`.github/workflows/ci.yml`) installs Chrome, runs the suite with `REQUIRE_RE
 | `Startup` warning about `SENDGRID_API_KEY` | Leftover variable from the old provider; delete it from `.env` |
 | `Charts did not finish rendering…` | Raise `PDF_CHART_TIMEOUT_MS`; check the message for page errors |
 | Report stuck in `pending` | Restart the server; stale ones are marked `failed/interrupted` |
+
+## Free cloud portfolio deployment (no payment card)
+
+ExecuBrief has an **optional cloud mode** for a zero-cost portfolio deployment: Render Free runs Node.js while Supabase Free stores organisation accounts, CSV imports and PDFs. Apply `supabase/migrations/0001_execubrief_cloud.sql` in the Supabase SQL Editor and configure `SUPABASE_URL` and `SUPABASE_SECRET_KEY` as Render server-side environment variables. The service starts with `npm run start:cloud`; local Windows development continues using `npm start` and SQLite.
+
+Read [docs/FREE_DEPLOYMENT_NO_CARD.md](docs/FREE_DEPLOYMENT_NO_CARD.md) before deploying. The cloud adapter rehydrates organisation CSVs into a short-lived in-memory SQLite database and caches it briefly to reduce free-tier egress; the cache resets on sleep/redeploy. Free services sleep, Supabase Free may pause after a week of inactivity, public demo report history may reset, and free tiers are not guaranteed always-on production services. Never commit `.env` or expose the Supabase service-role secret. Do not deploy the earlier paid Blueprint; the checked-in `render.yaml` must have `plan: free` and no persistent-disk stanza.

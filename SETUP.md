@@ -57,3 +57,8 @@ Do not use the private seed command as a shortcut for demo initialization. Do no
 **Demo database refused:** the configured existing demo database does not have the ExecuBrief synthetic marker, or the demo/private storage paths overlap. Do not delete the file blindly; point `DEMO_DATABASE_PATH` at a new, dedicated demo path after inspecting your configuration.
 
 See [docs/CUSTOM_REPORTING_AND_AUTH.md](docs/CUSTOM_REPORTING_AND_AUTH.md) for the additive private CSV-to-PDF workspace, email/password sign-in, optional Google OAuth setup, storage isolation, and phased implementation notes. See [README.md](README.md) for CLI reporting, CSV import, email, API contracts, and existing tests, and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for hosted deployment preparation.
+
+
+## Free cloud deployment (no card)
+
+For a $0 online portfolio demo, follow [docs/FREE_DEPLOYMENT_NO_CARD.md](docs/FREE_DEPLOYMENT_NO_CARD.md). This uses the optional cloud start command and Supabase migration; it does not replace local SQLite mode. Do not deploy a paid Render Blueprint or expose the Supabase service-role key.

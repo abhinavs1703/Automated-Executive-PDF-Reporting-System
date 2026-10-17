@@ -1,5 +1,7 @@
 # Test fixes and verification
 
+> **Scope note:** the aggregate numbers below are historical results for the local SQLite-mode release before the $0 Supabase cloud runtime was added. For current cloud-mode verification and blockers, see [`IMPLEMENTATION_STATUS.md`](IMPLEMENTATION_STATUS.md). They must not be interpreted as an end-to-end result for a live Supabase/Render deployment.
+
 ## What was fixed
 
 1. `test/custom-browser-flow.test.js` expected the obsolete text `rows validated`. The CSV preview correctly displays a count plus the available date range, such as `5 valid rows detected across 2026-09-01 to 2026-09-04`. The assertion now checks for the current count-bearing status message instead of an obsolete phrase.
