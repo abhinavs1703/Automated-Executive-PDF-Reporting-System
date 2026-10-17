@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <meta name="description" content="Private organisation analytics workspace for ExecuBrief.">
+  <title>Executive Pulse — ExecuBrief</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/workspace.css">
+  <script src="/vendor/chart.umd.js" defer></script>
+  <script src="/organization-dashboard.js" defer></script>
+</head>
+<body class="org-dashboard-page">
+  <header class="topbar workspace-topbar">
+    <a class="brand" href="/" aria-label="ExecuBrief public overview">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="brand-copy"><strong>ExecuBrief</strong><small>Executive reporting, clearly.</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Overview</a>
+      <a href="/workspace" class="nav-link active" aria-current="page">Workspace</a>
+      <a href="/custom-reports" class="nav-link">Custom PDFs</a>
+    </nav>
+    <div class="workspace-user"><span id="org-user-name">Signed in</span><span class="account-organisation" id="org-user-organisation"></span><button type="button" id="org-sign-out">Sign out</button></div>
+  </header>
+
+  <main class="workspace-shell org-workspace-shell">
+    <section class="workspace-intro org-hero" aria-labelledby="org-page-title">
+      <div>
+        <p class="eyebrow">PRIVATE ORGANISATION WORKSPACE</p>
+        <h1 id="org-page-title">Executive Pulse<span class="org-title-spark" aria-hidden="true">✦</span></h1>
+        <p>One clear view of your organisation’s performance, built from the CSV data your team imports.</p>
+        <div class="org-meta-line"><span class="org-live-dot" aria-hidden="true"></span><span id="org-data-status">Loading workspace data…</span><span class="org-meta-separator">·</span><span id="org-date-coverage">Date coverage pending</span></div>
+      </div>
+      <a href="#import-data" class="button button-primary org-hero-action">＋ Import data</a>
+    </section>
+
+    <div id="org-global-status" class="workspace-status org-global-status" role="status" aria-live="polite"></div>
+
+    <section class="panel workspace-card org-period-panel" aria-labelledby="org-period-title">
+      <div class="org-period-heading"><div><p class="eyebrow">PERFORMANCE WINDOW</p><h2 id="org-period-title">Explore your results</h2><p class="panel-description">Choose a quick range or set exact dates. Results and comparisons use imported records from this organisation only.</p></div><span class="org-period-chip" id="org-period-label">Waiting for data</span></div>
+      <div class="org-filter-layout">
+        <div class="org-preset-group" role="group" aria-label="Quick reporting periods">
+          <button class="org-preset" data-days="7" type="button">7 days</button>
+          <button class="org-preset active" data-days="30" type="button">30 days</button>
+          <button class="org-preset" data-days="90" type="button">90 days</button>
+        </div>
+        <form id="org-period-form" class="org-date-form">
+          <div class="field-group"><label for="org-start-date">Start date</label><input class="workspace-input" id="org-start-date" type="date" required></div>
+          <span class="date-separator" aria-hidden="true">to</span>
+          <div class="field-group"><label for="org-end-date">End date</label><input class="workspace-input" id="org-end-date" type="date" required></div>
+          <button class="button button-secondary" id="org-apply-period" type="submit">Apply period</button>
+        </form>
+      </div>
+      <div class="org-dimension-filters" role="group" aria-label="Analytics dimension filters">
+        <div class="field-group"><label for="org-category-filter">Category</label><select class="workspace-select" id="org-category-filter" disabled><option value="">All categories</option></select></div>
+        <div class="field-group"><label for="org-region-filter">Region</label><select class="workspace-select" id="org-region-filter" disabled><option value="">All regions</option></select></div>
+        <button class="button button-quiet org-clear-filters" id="org-clear-filters" type="button" disabled>Clear filters</button>
+        <p class="org-filter-summary" id="org-filter-summary" aria-live="polite">Dimension filters become available after data is imported.</p>
+      </div>
+      <p class="workspace-hint" id="org-period-help">Import a CSV to discover the available dates. Reports support up to 93 days at a time.</p>
+    </section>
+
+    <section class="org-kpi-grid" aria-label="Organisation key performance indicators" aria-live="polite">
+      <article class="org-kpi-card org-kpi-revenue"><div class="org-kpi-label"><span>Total revenue</span><span class="org-kpi-icon" aria-hidden="true">↗</span></div><p class="org-kpi-value" id="org-kpi-revenue">—</p><p class="org-kpi-foot" id="org-kpi-revenue-change">Import data to begin</p><div class="org-kpi-spark spark-revenue" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></article>
+      <article class="org-kpi-card"><div class="org-kpi-label"><span>Distinct orders</span><span class="org-kpi-icon" aria-hidden="true">▤</span></div><p class="org-kpi-value" id="org-kpi-orders">—</p><p class="org-kpi-foot" id="org-kpi-orders-change">Across selected period</p><div class="org-kpi-mini-rule" aria-hidden="true"></div></article>
+      <article class="org-kpi-card"><div class="org-kpi-label"><span>Average order value</span><span class="org-kpi-icon" aria-hidden="true">◈</span></div><p class="org-kpi-value" id="org-kpi-aov">—</p><p class="org-kpi-foot">Revenue per distinct order</p><div class="org-kpi-mini-rule" aria-hidden="true"></div></article>
+      <article class="org-kpi-card"><div class="org-kpi-label"><span>Unique customers</span><span class="org-kpi-icon" aria-hidden="true">◎</span></div><p class="org-kpi-value" id="org-kpi-customers">—</p><p class="org-kpi-foot" id="org-kpi-customers-note">Available when a customer column is mapped</p><div class="org-kpi-mini-rule" aria-hidden="true"></div></article>
+      <article class="org-kpi-card org-kpi-profit"><div class="org-kpi-label"><span>Gross profit</span><span class="org-kpi-icon" aria-hidden="true">◒</span></div><p class="org-kpi-value" id="org-kpi-profit">—</p><p class="org-kpi-foot" id="org-kpi-margin">Margin unavailable in source data</p><div class="org-profit-track" aria-hidden="true"><span id="org-profit-track-fill"></span></div></article>
+    </section>
+
+    <section class="org-analytics-grid" aria-label="Organisation analytics">
+      <article class="panel org-chart-panel org-chart-wide"><div class="panel-heading"><div><p class="eyebrow">REVENUE MOMENTUM</p><h2>Revenue over time</h2><p class="panel-description">Daily revenue in the selected reporting window.</p></div><span class="org-chart-tag" id="org-trend-count">Daily totals</span></div><div class="org-chart-wrap org-trend-wrap"><canvas id="org-revenue-chart" role="img" aria-label="Daily revenue line chart"></canvas><p class="chart-fallback hidden" id="org-revenue-chart-fallback">Chart assets are unavailable; the underlying totals remain available.</p></div></article>
+      <article class="panel org-chart-panel"><div class="panel-heading"><div><p class="eyebrow">PRODUCT MIX</p><h2>Revenue by category</h2><p class="panel-description">Where the selected period’s revenue comes from.</p></div></div><div class="org-chart-wrap"><canvas id="org-category-chart" role="img" aria-label="Revenue by category chart"></canvas><p class="chart-fallback hidden" id="org-category-chart-fallback">No category data available yet.</p></div><div class="org-chart-legend-note" id="org-category-note">Categories are inferred from the imported file.</div></article>
+      <article class="panel org-chart-panel"><div class="panel-heading"><div><p class="eyebrow">MARKET FOOTPRINT</p><h2>Revenue by region</h2><p class="panel-description">Top regions where a region column is available.</p></div></div><div class="org-chart-wrap"><canvas id="org-region-chart" role="img" aria-label="Revenue by region chart"></canvas><p class="chart-fallback hidden" id="org-region-chart-fallback">Region analytics appear when the CSV includes a region column.</p></div><div class="org-chart-legend-note" id="org-region-note">Region mapping is optional.</div></article>
+    </section>
+
+    <section class="org-insights-grid" aria-label="Business signals and import health">
+      <article class="panel org-insights-panel"><div class="panel-heading"><div><p class="eyebrow">DECISION SUPPORT</p><h2>Business Signals</h2><p class="panel-description">Evidence-based highlights calculated from the selected period.</p></div><span class="org-insight-symbol" aria-hidden="true">✧</span></div><div id="org-business-signals" class="org-business-signals"><p class="org-empty-copy">Import data to surface business signals.</p></div></article>
+      <article class="panel org-insights-panel org-health-panel"><div class="panel-heading"><div><p class="eyebrow">DATA QUALITY</p><h2>Import health</h2><p class="panel-description">A transparent view of the files contributing to your dashboard.</p></div><span class="org-health-indicator" id="org-health-indicator">Awaiting data</span></div><div class="org-health-metrics"><div><span>Successful imports</span><strong id="org-health-files">0</strong></div><div><span>Rows in workspace</span><strong id="org-health-rows">0</strong></div><div><span>Duplicates skipped</span><strong id="org-health-duplicates">0</strong></div><div><span>Invalid rows skipped</span><strong id="org-health-invalid">0</strong></div></div><p class="org-health-latest" id="org-health-latest">No data imported yet.</p></article>
+    </section>
+
+    <section class="panel workspace-card org-import-panel" id="import-data" aria-labelledby="org-import-title">
+      <div class="panel-heading"><div><p class="eyebrow">WORKSPACE DATA HUB</p><h2 id="org-import-title">Import a CSV file</h2><p class="panel-description">Add one file at a time. Successful rows are added to your organisation’s cumulative dataset and reflected in analytics. Exact duplicate files are detected.</p></div><span class="org-import-icon" aria-hidden="true">⇧</span></div>
+      <div class="org-import-callout"><span class="org-callout-icon" aria-hidden="true">i</span><p><strong>Private to your organisation.</strong> Uploaded rows are kept separate from the public demo and other organisations. Data is not converted between currencies, so keep each workspace to one reporting currency.</p></div>
+      <div class="org-import-settings"><div class="field-group"><label for="org-import-currency">Workspace currency</label><select class="workspace-select" id="org-import-currency"><option value="USD">USD — US Dollar</option><option value="INR">INR — Indian Rupee</option><option value="GBP">GBP — British Pound</option><option value="EUR">EUR — Euro</option><option value="CAD">CAD — Canadian Dollar</option><option value="AUD">AUD — Australian Dollar</option><option value="SGD">SGD — Singapore Dollar</option><option value="JPY">JPY — Japanese Yen</option></select><span class="field-help" id="org-import-currency-help">If the CSV contains a currency column, its value is detected automatically.</span></div></div>
+      <div class="workspace-upload-row org-upload-row"><input type="file" id="org-csv-file" accept=".csv,text/csv" aria-label="Choose CSV file to import"><button type="button" class="button button-secondary" id="org-preview-csv">Preview file</button><button type="button" class="button button-primary" id="org-import-csv" disabled>Import into workspace</button></div>
+      <p class="workspace-hint">CSV limit: 5 MB and 50,000 data rows. Required fields: date, amount/revenue, and product. Map optional dimensions to unlock richer analytics.</p>
+      <p id="org-import-status" class="workspace-status" role="status" aria-live="polite"></p>
+      <div id="org-csv-preview" class="hidden org-csv-preview"><div class="org-preview-summary"><div><strong id="org-preview-filename">Selected CSV</strong><span id="org-preview-row-count">0 rows</span></div><p id="org-preview-date-range">Date range will appear after preview.</p><p id="org-preview-warnings" class="org-preview-warnings"></p></div><div id="org-mapping-grid" class="mapping-grid"></div><div class="csv-preview"><h3>Sample rows</h3><div class="table-scroll"><table><thead id="org-sample-head"></thead><tbody id="org-sample-body"></tbody></table></div></div></div>
+    </section>
+
+    <section class="panel workspace-card org-import-history-panel" aria-labelledby="org-import-history-title">
+      <div class="panel-heading"><div><p class="eyebrow">SOURCE REGISTER</p><h2 id="org-import-history-title">Import history</h2><p class="panel-description">See which source files were applied, when, and how their rows were handled.</p></div><button class="button button-secondary" id="org-refresh-imports" type="button">Refresh</button></div>
+      <div class="table-toolbar report-toolbar" aria-label="Filter import history">
+        <label class="toolbar-field toolbar-search" for="org-import-search">Search source files<input id="org-import-search" type="search" placeholder="CSV filename…" autocomplete="off"></label>
+        <label class="toolbar-field" for="org-import-status-filter">Status<select id="org-import-status-filter"><option value="">All statuses</option><option value="completed">Completed</option><option value="partial">Partial</option><option value="failed">Failed</option><option value="duplicate">Duplicate</option></select></label>
+        <span class="toolbar-result-count" id="org-import-filter-count" aria-live="polite">Loading imports…</span>
+      </div>
+      <div class="table-scroll"><table class="workspace-reports-table"><thead><tr><th>Source file</th><th>Imported</th><th>Status</th><th class="numeric">Rows added</th><th class="numeric">Duplicates</th><th class="numeric">Invalid rows</th><th>Date coverage</th></tr></thead><tbody id="org-import-list"><tr><td colspan="7" class="table-state">Loading import history…</td></tr></tbody></table></div><p class="workspace-empty hidden" id="org-import-empty">Your organisation has not imported a CSV yet.</p>
+    </section>
+
+    <section class="panel workspace-card org-report-panel" aria-labelledby="org-report-title">
+      <div class="panel-heading"><div><p class="eyebrow">EXECUTIVE BRIEF</p><h2 id="org-report-title">Generate a workspace report</h2><p class="panel-description">Create a real PDF from all successfully imported rows in this organisation for the chosen dates.</p></div><span class="org-report-stamp" aria-hidden="true">PDF</span></div>
+      <form id="org-report-form" class="org-report-form"><div class="field-group"><label for="org-report-name">Report title</label><input class="workspace-input" id="org-report-name" maxlength="100" value="Executive Pulse — Organisation Brief" required></div><div class="field-group"><label for="org-report-start">Start date</label><input class="workspace-input" type="date" id="org-report-start" required></div><div class="field-group"><label for="org-report-end">End date</label><input class="workspace-input" type="date" id="org-report-end" required></div><button class="button button-primary" id="org-generate-report" type="submit" disabled>Generate organisation PDF</button></form>
+      <p class="workspace-status" id="org-report-status" role="status" aria-live="polite"></p>
+      <section id="org-report-preview" class="org-report-preview hidden" aria-labelledby="org-report-preview-title"><div class="org-report-preview-header"><div><h3 id="org-report-preview-title">Executive report ready</h3><p id="org-report-preview-subtitle"></p></div><div class="preview-actions"><a class="button button-primary" id="org-report-download" href="#" download>Download PDF</a><button class="button button-quiet" type="button" id="org-report-close">Close preview</button></div></div><iframe id="org-report-frame" title="Organisation executive PDF preview" loading="lazy"></iframe></section>
+    </section>
+
+    <footer class="page-footer"><span>ExecuBrief · Executive reporting, clearly.</span><span>Your private workspace contains your organisation’s imported records.</span></footer>
+  </main>
+</body>
+</html>

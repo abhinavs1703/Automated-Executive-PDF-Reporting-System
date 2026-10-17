@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <meta name="description" content="Upload a CSV and create private, customized executive PDF reports with ExecuBrief.">
+  <title>Custom PDF Reports — ExecuBrief</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/workspace.css">
+  <script src="/custom-reports.js" defer></script>
+</head>
+<body>
+  <header class="topbar workspace-topbar">
+    <a class="brand" href="/" aria-label="ExecuBrief dashboard">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="brand-copy"><strong>ExecuBrief</strong><small>Executive reporting, clearly.</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Overview</a>
+      <a href="/#reports" class="nav-link">Reports</a>
+      <a href="/workspace" class="nav-link">Workspace</a>
+      <a href="/custom-reports" class="nav-link active" aria-current="page">Custom PDFs</a>
+    </nav>
+    <div class="workspace-user"><span id="account-name">Signed in</span><span class="account-organisation" id="account-organisation"></span><button type="button" id="sign-out">Sign out</button></div>
+  </header>
+
+  <main class="workspace-shell">
+    <section class="workspace-intro" aria-labelledby="workspace-title">
+      <div>
+        <p class="eyebrow">PRIVATE REPORTING WORKSPACE</p>
+        <h1 id="workspace-title">Custom PDF reports</h1>
+        <p>Upload your own CSV, map its columns, and create an executive PDF from your data.</p>
+      </div>
+    </section>
+
+    <section class="panel workspace-card" aria-labelledby="upload-title">
+      <div class="panel-heading">
+        <div><p class="eyebrow">STEP 1</p><h2 id="upload-title">Upload your sales CSV</h2><p class="panel-description">Your file is validated before any report is generated. Only CSV files up to 5 MB and 50,000 rows are accepted by default.</p></div>
+      </div>
+      <div class="workspace-upload-row">
+        <input type="file" id="csv-file" accept=".csv,text/csv" aria-label="Choose a CSV file">
+        <button type="button" class="button button-secondary" id="preview-csv">Read CSV and preview</button>
+      </div>
+      <p class="workspace-hint">Required fields: a date, a product name, and a line-total amount. Common headers such as Order Date, Revenue, Product, Customer, and Order ID are detected automatically. You can correct the column mapping below.</p>
+      <p class="workspace-status" id="upload-status" role="status" aria-live="polite"></p>
+
+      <div id="csv-preview-area" class="hidden">
+        <div class="panel-heading csv-mapping-heading">
+          <div><p class="eyebrow">COLUMN MAPPING</p><h2>Match your CSV columns</h2><p class="panel-description">Choose which column supplies each report field. Optional fields can be left as automatic defaults.</p></div>
+          <span class="report-count" id="csv-row-count">0 rows</span>
+        </div>
+        <div id="mapping-grid" class="mapping-grid"></div><div class="workspace-actions"><button type="button" class="button button-secondary" id="recheck-mapping">Recheck columns and date coverage</button><span class="workspace-hint" id="mapping-check-hint">Recheck after changing column selections.</span></div>
+        <div class="csv-preview">
+          <h3>Sample rows</h3>
+          <div class="table-scroll"><table><thead id="sample-head"></thead><tbody id="sample-body"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel workspace-card" aria-labelledby="settings-title">
+      <div class="panel-heading">
+        <div><p class="eyebrow">STEP 2</p><h2 id="settings-title">Customize your PDF</h2><p class="panel-description">Set the report heading, currency, and reporting period. The current PDF layout and visual style are retained.</p></div>
+      </div>
+      <div id="date-range-info" class="date-range-info" aria-live="polite"><strong>Available data dates</strong><span id="date-availability-text">Upload and preview a CSV to detect its dates.</span><span id="date-range-warning" class="date-range-warning"></span><div class="date-preset-row"><button type="button" class="date-preset" data-days="7" disabled>Latest 7 days</button><button type="button" class="date-preset" data-days="30" disabled>Latest 30 days</button><button type="button" class="date-preset" data-days="93" disabled>Latest 93 days</button></div></div>
+      <div class="workspace-form-grid">
+        <div class="field-group"><label for="report-title">Report title / organization</label><input class="workspace-input" id="report-title" type="text" maxlength="100" value="Custom Executive Brief" required></div>
+        <div class="field-group"><label for="report-currency">Report currency</label><select class="workspace-select" id="report-currency"><option value="USD">USD — US Dollar</option><option value="INR">INR — Indian Rupee</option><option value="GBP">GBP — British Pound</option><option value="EUR">EUR — Euro</option><option value="CAD">CAD — Canadian Dollar</option><option value="AUD">AUD — Australian Dollar</option><option value="SGD">SGD — Singapore Dollar</option><option value="JPY">JPY — Japanese Yen</option></select></div>
+        <div class="field-group"><label for="custom-start-date">Start date (optional)</label><input class="workspace-input" id="custom-start-date" type="date"></div>
+        <div class="field-group"><label for="custom-end-date">End date (optional)</label><input class="workspace-input" id="custom-end-date" type="date"></div>
+      </div>
+      <p class="workspace-hint">Select one of the suggested ranges, or enter dates within the available CSV period. Reports are limited to 93 days. If the file contains a currency column, its currency must match the report currency; no conversion is performed.</p>
+      <div class="workspace-actions"><button type="button" class="button button-primary" id="generate-custom-report" disabled>Generate customized PDF</button><a class="button button-quiet" href="/">Back to overview</a></div>
+      <p class="workspace-status" id="generation-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel workspace-card" aria-labelledby="history-title">
+      <div class="panel-heading"><div><p class="eyebrow">REPORT LIBRARY</p><h2 id="history-title">Your custom reports</h2><p class="panel-description">Reports belong to your organisation workspace and can be shared with its members.</p></div><button class="button button-secondary" id="refresh-history" type="button">Refresh</button></div>
+      <div class="table-toolbar report-toolbar" aria-label="Filter custom reports">
+        <label class="toolbar-field toolbar-search" for="custom-history-search">Search reports<input id="custom-history-search" type="search" placeholder="Report title, source file, or ID…" autocomplete="off"></label>
+        <label class="toolbar-field" for="custom-history-status">Status<select id="custom-history-status"><option value="">All statuses</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="failed">Failed</option></select></label>
+        <span class="toolbar-result-count" id="custom-history-count" aria-live="polite">Loading reports…</span>
+      </div>
+      <div class="table-scroll"><table class="workspace-reports-table"><thead><tr><th scope="col">Report</th><th scope="col">Source CSV</th><th scope="col">Reporting period</th><th scope="col">Created</th><th scope="col">Status</th><th scope="col" class="numeric">Revenue</th><th scope="col">Actions</th></tr></thead><tbody id="custom-reports-list"><tr><td colspan="7" class="table-state">Loading your reports…</td></tr></tbody></table></div>
+      <p class="workspace-empty hidden" id="custom-reports-empty">No custom reports yet. Upload a CSV above to generate your first private report.</p>
+    </section>
+
+    <section class="panel workspace-card workspace-preview hidden" id="custom-pdf-preview" aria-labelledby="custom-preview-title">
+      <div class="panel-heading"><div><p class="eyebrow">DOCUMENT PREVIEW</p><h2 id="custom-preview-title">Custom executive report</h2><p class="panel-description" id="custom-preview-subtitle">PDF preview</p></div><div class="preview-actions"><a class="button button-primary" id="custom-pdf-download" href="#" download>Download PDF ↧</a><button class="button button-quiet" id="close-custom-preview" type="button">Close preview</button></div></div>
+      <iframe id="custom-pdf-frame" title="Customized executive report PDF preview" loading="lazy"></iframe>
+    </section>
+    <footer class="page-footer"><span>ExecuBrief · Private custom reports</span><span>Uploaded data is isolated from public synthetic demo data.</span></footer>
+  </main>
+</body>
+</html>

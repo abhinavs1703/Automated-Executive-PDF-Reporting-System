@@ -1,0 +1,6 @@
+Order ID,Order Date,Product,Category,Customer,Revenue
+ORD-001,2026-09-01,Wireless Keyboard,Accessories,Ada Example,129.99
+ORD-001,2026-09-01,Wireless Mouse,Accessories,Ada Example,49.50
+ORD-002,2026-09-02,Monitor,Displays,Lin Example,1200.00
+ORD-003,2026-09-03,Desk Lamp,Workspace,Jordan Example,74.95
+ORD-004,2026-09-04,USB-C Dock,Connectivity,Ada Example,89.50

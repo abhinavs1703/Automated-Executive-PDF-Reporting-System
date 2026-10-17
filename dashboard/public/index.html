@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <meta name="description" content="ExecuBrief turns sales data into concise executive analytics and real PDF reports.">
+  <title>ExecuBrief — Executive Reporting</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/vendor/chart.umd.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="ExecuBrief overview">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="brand-copy"><strong>ExecuBrief</strong><small>Executive reporting, clearly.</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#overview" class="nav-link active">Overview</a>
+      <a href="#reports" class="nav-link">Reports</a>
+      <a href="/custom-reports" class="nav-link">Custom PDFs</a>
+    </nav>
+    <div class="topbar-actions">
+      <div class="demo-tag"><span class="demo-dot" aria-hidden="true"></span> Synthetic demo data</div>
+      <div class="topbar-account" id="topbar-account" aria-label="Account actions">
+        <a href="/login" class="button button-signin">Sign in</a>
+        <a href="/signup" class="account-register-link">Create account</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-intro" id="overview" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">BUSINESS INTELLIGENCE / WEEKLY BRIEF</p>
+        <h1 id="page-title">Executive overview</h1>
+        <p class="intro-copy">A clear view of performance, trends, and the reports your team can act on.</p>
+      </div>
+      <div class="period-chip"><span class="period-chip-icon" aria-hidden="true">↗</span><span><small>REPORTING PERIOD</small><strong id="period-label">Loading period…</strong></span></div>
+    </section>
+
+    <section class="filter-panel" aria-labelledby="period-heading">
+      <div class="filter-heading">
+        <div><p class="eyebrow">CUSTOM VIEW</p><h2 id="period-heading">Choose a reporting period</h2></div>
+        <p>Compare the selected dates with the preceding period of equal length.</p>
+      </div>
+      <form id="period-form" class="period-form">
+        <div class="field-group"><label for="start-date">Start date</label><input id="start-date" name="startDate" type="date" required></div>
+        <span class="date-separator" aria-hidden="true">to</span>
+        <div class="field-group"><label for="end-date">End date</label><input id="end-date" name="endDate" type="date" required></div>
+        <div class="filter-actions"><button class="button button-secondary" id="apply-period" type="submit">Apply period</button><button class="button button-primary" id="generate-report" type="button"><span aria-hidden="true">＋</span> Generate PDF report</button></div>
+      </form>
+      <div class="period-preset-row" role="group" aria-label="Quick reporting periods">
+        <span class="period-preset-label">QUICK RANGE</span>
+        <button class="period-preset" type="button" data-period-days="7" aria-pressed="false">7 days</button>
+        <button class="period-preset active" type="button" data-period-days="30" aria-pressed="true">30 days</button>
+        <button class="period-preset" type="button" data-period-days="90" aria-pressed="false">90 days</button>
+        <span class="period-preset-note">Presets end on the currently selected end date.</span>
+      </div>
+      <p class="form-hint">Up to 93 days per report. Public demo requests use synthetic sample data only.</p>
+    </section>
+
+    <section class="kpi-grid" aria-label="Key performance indicators" aria-live="polite">
+      <article class="kpi-card kpi-revenue">
+        <div class="kpi-top"><span class="kpi-label">Total revenue</span><span class="kpi-icon" aria-hidden="true">$</span></div>
+        <p class="kpi-value" id="kpi-revenue">—</p><p class="kpi-change" id="revenue-change">Comparing periods…</p>
+        <div class="kpi-bottom"><span class="tiny-rule"></span><span>Selected period</span></div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Distinct orders</span><span class="kpi-icon orders-icon" aria-hidden="true">▤</span></div>
+        <p class="kpi-value" id="kpi-orders">—</p><p class="kpi-change" id="orders-change">Comparing periods…</p>
+        <div class="kpi-bottom"><span class="tiny-rule"></span><span>Distinct order IDs</span></div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Average order value</span><span class="kpi-icon aov-icon" aria-hidden="true">◈</span></div>
+        <p class="kpi-value" id="kpi-aov">—</p><p class="kpi-change" id="aov-note">Revenue ÷ distinct orders</p>
+        <div class="kpi-bottom"><span class="tiny-rule"></span><span>Per order</span></div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Previous-period revenue</span><span class="kpi-icon previous-icon" aria-hidden="true">↶</span></div>
+        <p class="kpi-value" id="kpi-previous-revenue">—</p><p class="kpi-change neutral-change" id="previous-period-label">Equal-length period</p>
+        <div class="kpi-bottom"><span class="tiny-rule"></span><span id="previous-dates">Previous period</span></div>
+      </article>
+    </section>
+
+    <section class="analytics-grid" aria-label="Revenue analytics">
+      <article class="panel chart-panel">
+        <div class="panel-heading"><div><p class="eyebrow">PERFORMANCE</p><h2>Revenue over time</h2></div><span class="panel-subtitle" id="trend-subtitle">Daily totals</span></div>
+        <div class="chart-wrap"><canvas id="revenue-chart" role="img" aria-label="Line chart of daily revenue"></canvas><p class="chart-fallback hidden" id="revenue-chart-fallback">Chart assets are unavailable; the underlying analytics are still available below.</p></div>
+      </article>
+      <article class="panel chart-panel">
+        <div class="panel-heading"><div><p class="eyebrow">ORDER ACTIVITY</p><h2>Orders by day</h2></div><span class="panel-subtitle">Distinct orders</span></div>
+        <div class="chart-wrap"><canvas id="orders-chart" role="img" aria-label="Bar chart of distinct orders per day"></canvas><p class="chart-fallback hidden" id="orders-chart-fallback">Chart assets are unavailable; order totals are still shown in the daily table.</p></div>
+      </article>
+    </section>
+
+    <section class="detail-grid">
+      <article class="panel data-panel">
+        <div class="panel-heading"><div><p class="eyebrow">PRODUCT MIX</p><h2>Top products</h2><p class="panel-description">Search and sort the products contributing most to this period.</p></div><span class="panel-subtitle">By revenue</span></div>
+        <div class="table-toolbar product-toolbar" aria-label="Filter top products">
+          <label class="toolbar-field toolbar-search" for="product-search">Search products<input id="product-search" type="search" placeholder="Product name…" autocomplete="off"></label>
+          <label class="toolbar-field" for="product-category-filter">Category<select id="product-category-filter"><option value="">All categories</option></select></label>
+          <label class="toolbar-field" for="product-sort">Sort by<select id="product-sort"><option value="revenue">Revenue: high to low</option><option value="orders">Orders: high to low</option><option value="name">Name: A to Z</option></select></label>
+        </div>
+        <div class="table-scroll"><table><thead><tr><th scope="col">Product</th><th scope="col">Category</th><th scope="col">Orders</th><th scope="col" class="numeric">Revenue</th></tr></thead><tbody id="products-list"><tr><td colspan="4" class="table-state">Loading product performance…</td></tr></tbody></table></div>
+      </article>
+      <article class="panel data-panel">
+        <div class="panel-heading"><div><p class="eyebrow">DAY-BY-DAY</p><h2>Daily summary</h2></div><span class="panel-subtitle" id="daily-count">Selected period</span></div>
+        <div class="table-scroll"><table><thead><tr><th scope="col">Date</th><th scope="col" class="numeric">Orders</th><th scope="col" class="numeric">Revenue</th></tr></thead><tbody id="daily-list"><tr><td colspan="3" class="table-state">Loading daily data…</td></tr></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="panel reports-panel" id="reports" aria-labelledby="reports-heading">
+      <div class="panel-heading reports-heading"><div><p class="eyebrow">REPORT LIBRARY</p><h2 id="reports-heading">Recent reports</h2><p class="panel-description">Generated PDFs are saved in demo storage and remain available in this instance.</p></div><span class="report-count" id="report-count">0 reports</span></div>
+      <div class="table-toolbar report-toolbar" aria-label="Filter recent reports">
+        <label class="toolbar-field toolbar-search" for="reports-search">Search reports<input id="reports-search" type="search" placeholder="Title or report ID…" autocomplete="off"></label>
+        <label class="toolbar-field" for="reports-status-filter">Status<select id="reports-status-filter"><option value="">All statuses</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="failed">Failed</option></select></label>
+        <span class="toolbar-result-count" id="reports-filter-count" aria-live="polite">Showing latest reports</span>
+      </div>
+      <div class="table-scroll"><table class="reports-table"><thead><tr><th scope="col">Report</th><th scope="col">Reporting period</th><th scope="col">Created</th><th scope="col">Status</th><th scope="col" class="numeric">Revenue</th><th scope="col">Actions</th></tr></thead><tbody id="reports-list"><tr><td colspan="6" class="table-state">Loading report history…</td></tr></tbody></table></div>
+      <div class="empty-note hidden" id="reports-empty"><span class="empty-note-icon" aria-hidden="true">▤</span><div><strong>No reports generated yet</strong><p>Choose a date range above and generate your first executive PDF.</p></div></div>
+    </section>
+
+    <section class="panel pdf-panel hidden" id="pdf-preview" aria-labelledby="pdf-preview-heading">
+      <div class="panel-heading"><div><p class="eyebrow">DOCUMENT PREVIEW</p><h2 id="pdf-preview-heading">Executive report</h2><p class="panel-description" id="preview-subtitle">PDF preview</p></div><div class="preview-actions"><a class="button button-primary" id="pdf-download" href="#" download>Download PDF ↧</a><button class="button button-quiet" id="close-preview" type="button">Close preview</button></div></div>
+      <iframe id="pdf-iframe" title="Generated executive report PDF preview" loading="lazy"></iframe>
+    </section>
+
+    <footer class="page-footer"><span>ExecuBrief <span aria-hidden="true">·</span> Executive reporting, clearly.</span><span><span class="demo-dot" aria-hidden="true"></span> Public demonstration uses synthetic data only</span></footer>
+  </main>
+
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

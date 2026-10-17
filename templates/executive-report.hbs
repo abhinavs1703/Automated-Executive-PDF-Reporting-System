@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{metadata.companyName}} — Weekly Executive Report</title>
+  <style>
+    @page { size: A4; margin: 14mm 12mm 16mm; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { margin: 0 1px 0 0; font: 11px/1.45 Arial, Helvetica, sans-serif; color: #172033; background: #fff; }
+    header { display: flex; justify-content: space-between; gap: 24px; border-bottom: 3px solid #0f766e; padding-bottom: 14px; margin-bottom: 18px; }
+    h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.5px; color: #0f766e; }
+    h2 { break-after: avoid; page-break-after: avoid; margin: 22px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #dbe3ea; font-size: 14px; color: #172033; }
+    p { margin: 4px 0; }
+    .muted { color: #667085; }
+    .report-meta { text-align: right; min-width: 170px; font-size: 10px; }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 18px; }
+    .kpi { padding: 13px; border: 1px solid #dfe7ed; border-top: 3px solid #0f766e; border-radius: 5px; background: #f8fafc; }
+    .kpi-label { color: #667085; font-size: 9px; text-transform: uppercase; letter-spacing: .7px; font-weight: bold; }
+    .kpi-value { margin: 5px 0 3px; font-size: 20px; font-weight: 700; color: #111827; white-space: nowrap; }
+    .kpi-foot { font-size: 9px; color: #667085; }
+    .delta-positive { color: #0f766e; font-weight: bold; }
+    .delta-negative { color: #b42318; font-weight: bold; }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; page-break-inside: avoid; }
+    .chart-card { border: 1px solid #e1e7ed; border-radius: 5px; padding: 10px; min-width: 0; }
+    .chart-title { font-weight: bold; margin: 0 0 8px; font-size: 11px; }
+    .chart-area { height: 240px; position: relative; }
+    .chart-area canvas { width: 100% !important; height: 100% !important; }
+    .chart-area img.chart-image { display: block; width: 100%; height: 100%; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 11px; }
+    thead { display: table-header-group; }
+    th { padding: 10px 9px; text-align: left; background: #eef4f6; color: #344054; border-bottom: 2px solid #cbd5e1; }
+    td { padding: 10px 9px; border-bottom: 1px solid #e6ebef; }
+    tbody tr:nth-child(even) td { background: #fafcfd; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .keep-together { break-inside: avoid; page-break-inside: avoid; }
+    .closing { break-inside: avoid; page-break-inside: avoid; }
+    .empty { padding: 14px; text-align: center; color: #667085; }
+    .note { margin-top: 14px; padding: 10px; background: #f8fafc; color: #475467; border-left: 3px solid #94a3b8; }
+    footer { margin-top: 20px; padding-top: 8px; border-top: 1px solid #dbe3ea; color: #667085; font-size: 9px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>{{metadata.companyName}}</h1>
+      <p style="font-size:14px;font-weight:bold;">Weekly Executive Business Report</p>
+      <p class="muted">Performance overview for {{metadata.periodLabel}}</p>
+    </div>
+    <div class="report-meta">
+      <p><strong>Reporting period</strong></p>
+      <p>{{metadata.reportStart}} – {{metadata.reportEnd}}</p>
+      <p class="muted">Generated {{generatedDisplay}}</p>
+      <p class="muted">Currency: {{metadata.currency}}</p>
+    </div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi"><div class="kpi-label">Total revenue</div><div class="kpi-value">{{money summary.totalRevenue}}</div><div class="kpi-foot"><span class="{{revenueChangeClass}}">Period change: {{revenueChangeLabel}}</span></div></div>
+    <div class="kpi"><div class="kpi-label">Total orders</div><div class="kpi-value">{{summary.totalOrders}}</div><div class="kpi-foot"><span class="{{ordersChangeClass}}">Period change: {{ordersChangeLabel}}</span></div></div>
+    <div class="kpi"><div class="kpi-label">Average order value</div><div class="kpi-value">{{money summary.averageOrderValue}}</div><div class="kpi-foot">Previous period: {{money previousSummary.averageOrderValue}}</div></div>
+  </section>
+
+  <h2>Performance trends</h2>
+  <section class="chart-grid">
+    <div class="chart-card"><p class="chart-title">Daily revenue</p><div class="chart-area"><canvas id="dailyRevenueChart" aria-label="Daily revenue chart"></canvas></div></div>
+    <div class="chart-card"><p class="chart-title">Orders by day</p><div class="chart-area"><canvas id="dailyOrdersChart" aria-label="Daily orders chart"></canvas></div></div>
+  </section>
+  <section class="chart-grid" style="margin-top:12px;">
+    <div class="chart-card"><p class="chart-title">Revenue by product</p><div class="chart-area"><canvas id="productRevenueChart" aria-label="Product revenue chart"></canvas></div></div>
+    <div class="chart-card"><p class="chart-title">Revenue by category</p><div class="chart-area"><canvas id="categoryRevenueChart" aria-label="Category revenue chart"></canvas></div></div>
+  </section>
+
+  <section class="keep-together">
+  <h2>Top products</h2>
+  {{#if topProducts.length}}
+  <table>
+    <thead><tr><th>Product</th><th>Category</th><th class="num">Orders</th><th class="num">Avg. order</th><th class="num">Revenue</th></tr></thead>
+    <tbody>{{#each topProducts}}<tr><td>{{product}}</td><td>{{category}}</td><td class="num">{{totalOrders}}</td><td class="num">{{money averageOrderValue}}</td><td class="num">{{money revenue}}</td></tr>{{/each}}</tbody>
+  </table>
+  {{else}}<div class="empty">No orders were recorded during this reporting period.</div>{{/if}}
+  </section>
+
+  <section class="{{dailySectionClass}}">
+  <h2>Daily summary</h2>
+  <table>
+    <thead><tr><th>Date (UTC)</th><th class="num">Orders</th><th class="num">Revenue</th></tr></thead>
+    <tbody>{{#each dailyTrend}}<tr><td>{{date}}</td><td class="num">{{totalOrders}}</td><td class="num">{{money revenue}}</td></tr>{{/each}}</tbody>
+  </table>
+  </section>
+  <div class="closing">
+  <div class="note">Comparison baseline: {{previousSummary.startDate}} to {{previousSummary.endDate}}. A percentage change is unavailable when the previous-period baseline is zero.</div>
+  <footer>Automatically generated executive report. Data is aggregated from the configured SQL database.</footer>
+  </div>
+
+  <script>{{{chartJsBundle}}}</script>
+  <script>
+    (() => { try {
+      const data = {{{chartDataJson}}};
+      const currency = {{{currencyJson}}};
+      const money = (value) => `${currency} ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const colors = { teal: '#0f766e', blue: '#2563eb', amber: '#d97706', violet: '#7c3aed' };
+      const common = { responsive: true, maintainAspectRatio: false, animation: false, devicePixelRatio: 2, plugins: { legend: { display: false } } };
+      // Long category names are wrapped onto several lines (Chart.js draws array labels
+      // as multi-line ticks) so they are never clipped by the narrow print-width chart.
+      const wrapLabel = (text, max = 28) => {
+        const lines = [];
+        let line = '';
+        for (const word of String(text).split(' ')) {
+          if (line && `${line} ${word}`.length > max) { lines.push(line); line = word; } else { line = line ? `${line} ${word}` : word; }
+        }
+        if (line) lines.push(line);
+        const tidy = lines.slice(0, 2).map((entry) => (entry.length > max ? `${entry.slice(0, max - 1)}…` : entry));
+        if (lines.length > 2) tidy[1] = `${tidy[1].replace(/…$/, '')}…`;
+        return tidy.length > 1 ? tidy : tidy[0];
+      };
+      const charts = [];
+
+      // Draw all four charts at the CURRENT layout size. Safe to call repeatedly.
+      const build = () => {
+        charts.splice(0).forEach((chart) => chart.destroy());
+        // Software canvases make pixel read-back (verification + toDataURL) deterministic.
+        document.querySelectorAll('canvas').forEach((canvas) => canvas.getContext('2d', { willReadFrequently: true }));
+        charts.push(new Chart(document.getElementById('dailyRevenueChart'), { type: 'line', data: { labels: data.dailyLabels, datasets: [{ data: data.dailyRevenue, borderColor: colors.teal, backgroundColor: 'rgba(15,118,110,.12)', fill: true, tension: .25, pointRadius: 2 }] }, options: { ...common, scales: { y: { beginAtZero: true, ticks: { callback: (v) => money(v) } } } } }));
+        charts.push(new Chart(document.getElementById('dailyOrdersChart'), { type: 'bar', data: { labels: data.dailyLabels, datasets: [{ data: data.dailyOrders, backgroundColor: colors.blue, borderRadius: 3 }] }, options: { ...common, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } }));
+        charts.push(new Chart(document.getElementById('productRevenueChart'), { type: 'bar', data: { labels: data.productLabels.map((label) => wrapLabel(label)), datasets: [{ data: data.productRevenue, backgroundColor: colors.amber, borderRadius: 3 }] }, options: { ...common, indexAxis: 'y', scales: { y: { ticks: { autoSkip: false, font: { size: 9 } } }, x: { beginAtZero: true, ticks: { callback: (v) => money(v), maxTicksLimit: 4, font: { size: 10 } } } } } }));
+        charts.push(new Chart(document.getElementById('categoryRevenueChart'), { type: 'doughnut', data: { labels: data.categoryLabels, datasets: [{ data: data.categoryRevenue, backgroundColor: [colors.teal, colors.blue, colors.amber, colors.violet, '#64748b', '#be123c', '#4d7c0f', '#0891b2'] }] }, options: { ...common, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } } }));
+      };
+
+      // A chart must contain pixels unless it has no data to show (empty period).
+      const expectsContent = { dailyRevenueChart: true, dailyOrdersChart: true, productRevenueChart: true, categoryRevenueChart: data.categoryRevenue.length > 0 };
+      // Axis labels extend leftwards, so painted pixels in the very first bitmap column mean
+      // a label was cut off. (The right edge is not checked: a closing gridline legitimately ends there.)
+      const touchesEdge = (canvas) => {
+        const column = canvas.getContext('2d').getImageData(0, 0, 1, canvas.height).data;
+        return column.some((value, index) => index % 4 === 3 && value !== 0);
+      };
+      const paintedPixels = (canvas) => {
+        const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+        let painted = 0;
+        for (let i = 3; i < pixels.length; i += 4) if (pixels[i] !== 0) painted += 1;
+        return painted;
+      };
+      const inspect = () => charts.map((chart) => {
+        const canvas = chart.canvas;
+        const cssWidth = canvas.parentElement.clientWidth;
+        const cssHeight = canvas.parentElement.clientHeight;
+        const ratio = chart.currentDevicePixelRatio || 1;
+        const painted = paintedPixels(canvas);
+        const problems = [];
+        if (cssWidth < 50 || cssHeight < 50) problems.push('container has no usable layout size');
+        if (Math.abs(canvas.width / ratio - cssWidth) > 1 || Math.abs(canvas.height / ratio - cssHeight) > 1) problems.push('drawn at a different size than its container');
+        if (expectsContent[canvas.id] && painted === 0) problems.push('canvas is blank');
+        return { id: canvas.id, cssWidth, cssHeight, bitmapWidth: canvas.width, bitmapHeight: canvas.height, painted, clipped: touchesEdge(canvas), problems };
+      });
+
+      // Re-draw at the current layout and report per-chart status.
+      window.__renderReportCharts = () => { build(); return inspect(); };
+
+      // Deterministic hand-off to print. In ONE synchronous task: redraw at the final
+      // layout, verify every chart, and snapshot each canvas to PNG. Nothing can resize
+      // or redraw in between, and afterwards the live charts are destroyed and replaced
+      // by static images, so nothing can change before page.pdf().
+      window.__freezeReportCharts = async () => {
+        build();
+        const status = inspect();
+        if (status.some((entry) => entry.problems.length)) return { ok: false, status };
+        const snapshots = charts.map((chart) => ({ canvas: chart.canvas, url: chart.canvas.toDataURL('image/png') }));
+        charts.splice(0).forEach((chart) => chart.destroy());
+        const images = snapshots.map(({ canvas, url }) => {
+          const image = new Image();
+          image.className = 'chart-image';
+          image.alt = canvas.getAttribute('aria-label') || '';
+          image.src = url;
+          canvas.style.display = 'none';
+          canvas.after(image);
+          return image;
+        });
+        await Promise.all(images.map((image) => image.decode()));
+        const undecoded = images.filter((image) => !image.naturalWidth).length;
+        return { ok: undecoded === 0, status, images: images.length, undecoded };
+      };
+
+      build();
+      inspect();
+      window.__REPORT_CHARTS_READY = true;
+    } catch (error) { window.__REPORT_CHARTS_ERROR = String((error && error.message) || error); } })();
+  </script>
+</body>
+</html>

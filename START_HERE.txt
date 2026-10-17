@@ -1,0 +1,37 @@
+EXECUBRIEF — INTEGRATED RELEASE CANDIDATE
+========================================
+
+This source package includes:
+- Public synthetic-data Overview and responsive account controls
+- Organisation registration/login, isolated workspaces and optional Google OAuth code
+- CSV preview/import with date coverage, validation, duplicate accounting and import history
+- Interactive organisation analytics, filters, Business Signals and data-quality summary
+- Custom PDF creation, history, preview and download using the real report renderer
+- Express backend, SQLite analytics, CLI imports/reports, Resend integration and disabled-by-default scheduler
+- Automated tests, GitHub Actions workflow and Render deployment blueprint
+- Synthetic example CSVs including examples/enterprise-demo.csv
+
+SECURITY
+--------
+The real .env is intentionally absent. Keep your local .env in the project root next to package.json; never place it in src/ or dashboard/ and never commit it. The .env.example file contains placeholders only. Local databases, uploaded business data, generated PDFs, node_modules, and Git history are intentionally omitted.
+
+WINDOWS QUICK START
+-------------------
+1. Install Node.js 24.21.0 (the package requires Node >=24).
+2. Extract this ZIP into an empty folder. Confirm package.json is directly inside that folder.
+3. If you do not already have a .env, make one with:
+     Copy-Item .env.example .env
+   Otherwise preserve and review your existing .env privately. Check the data path variables before starting; they should be separate for private reports, auth, organisation custom data and synthetic demo storage.
+4. Open PowerShell in the project root and run each command separately:
+     npm.cmd ci
+     npx.cmd puppeteer browsers install chrome   # only if Chrome did not install during npm ci
+     npm.cmd run demo:init
+     npm.cmd test
+     npm.cmd start
+5. Open http://127.0.0.1:3000/ while the terminal remains open.
+6. Register an organisation at /signup, then open /workspace for organisation analytics/imports. The one-file Custom PDFs workflow is at /custom-reports.
+7. Stop the local server with Ctrl+C.
+
+TESTING AND DEPLOYMENT
+----------------------
+Read docs/FINAL_RELEASE_GUIDE.md before publishing. Review test totals and every skipped test. npm audit must be run with registry/network access. The current source has not been declared publicly deployed; the Render Blueprint is preparation only and paid hosting requires approval. Do not share a public URL until the deployed site and persistent storage have been externally verified.

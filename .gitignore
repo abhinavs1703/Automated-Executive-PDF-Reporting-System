@@ -1,0 +1,45 @@
+# Dependencies and package-manager caches
+node_modules/
+**/node_modules/
+.npm/
+.pnpm-store/
+
+# Environment variables / credentials (retain the harmless template only)
+.env
+.env.*
+!.env.example
+
+# Local databases and SQLite journal / WAL files (any directory)
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.wal
+*.shm
+/data/
+/demo-data/
+/custom-data/
+**/data/
+**/demo-data/
+**/custom-data/
+
+# Generated reports and runtime artifacts
+/reports/**
+!/reports/.gitkeep
+**/reports/**/*.pdf
+*.pdf
+*.log
+npm-debug.log*
+*.tmp
+*.bak
+*.backup
+coverage/
+.nyc_output/
+.DS_Store
+Thumbs.db
+
+# Local editor/OS artifacts
+.vscode/
+.idea/

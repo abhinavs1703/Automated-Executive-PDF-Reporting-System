@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies (downloads Chrome for Testing via Puppeteer)
+        run: npm ci
+      - name: Confirm a real browser is installed
+        run: npx puppeteer browsers list
+      - name: Test suite (real PDF rendering is mandatory in CI)
+        run: npm test
+        env:
+          REQUIRE_REAL_PDF: 'true'
+          # GitHub runners restrict unprivileged user namespaces; the sandbox flag is only for CI.
+          PUPPETEER_NO_SANDBOX: 'true'
+      - name: Dependency audit
+        run: npm audit --audit-level=moderate

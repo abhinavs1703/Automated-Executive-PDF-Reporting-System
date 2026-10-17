@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <meta name="description" content="Sign in to build private, customized ExecuBrief PDF reports from your own CSV data.">
+  <title>Sign in — ExecuBrief</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/workspace.css">
+  <script src="/auth.js" defer></script>
+</head>
+<body>
+  <header class="topbar workspace-topbar">
+    <a class="brand" href="/" aria-label="ExecuBrief dashboard">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="brand-copy"><strong>ExecuBrief</strong><small>Executive reporting, clearly.</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Overview</a>
+      <a href="/custom-reports" class="nav-link">Custom PDFs</a>
+    </nav>
+  </header>
+
+  <main class="auth-shell">
+    <section class="panel auth-card" aria-labelledby="auth-title">
+      <p class="eyebrow">YOUR REPORTING WORKSPACE</p>
+      <h1 id="auth-title">Welcome back</h1>
+      <p class="auth-intro" id="auth-intro">Sign in to open your organisation’s private reporting workspace.</p>
+
+      <a class="button button-secondary google-button" id="google-signin" href="/auth/google">
+        <span class="google-g" aria-hidden="true">G</span> Continue with Google
+      </a>
+      <p class="auth-note hidden" id="google-unavailable">Google sign-in is not configured yet. You can use your email and password, or configure the Google OAuth values in your local environment.</p>
+      <div class="auth-divider"><span>or continue with email</span></div>
+
+      <form id="login-form" class="auth-form">
+        <div class="field-group"><label for="login-email">Email address</label><input id="login-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"></div>
+        <div class="field-group"><label for="login-password">Password</label><input id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="128" placeholder="Your password"></div>
+        <button class="button button-primary auth-submit" type="submit">Sign in</button>
+      </form>
+
+      <form id="register-form" class="auth-form hidden">
+        <div class="field-group"><label for="register-organisation">Organisation name</label><input id="register-organisation" name="organizationName" type="text" autocomplete="organization" required minlength="2" maxlength="100" placeholder="Company or organisation name"></div>
+        <div class="field-group"><label for="register-name">Your name</label><input id="register-name" name="name" type="text" autocomplete="name" maxlength="100" placeholder="Full name"></div>
+        <div class="field-group"><label for="register-email">Email address</label><input id="register-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"></div>
+        <div class="field-group"><label for="register-password">Create password</label><input id="register-password" name="password" type="password" autocomplete="new-password" required minlength="12" maxlength="128" placeholder="At least 12 characters"><span class="field-help">Use at least 12 characters. Do not reuse a password from another site.</span></div>
+        <button class="button button-primary auth-submit" type="submit">Register organisation</button>
+      </form>
+
+      <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+      <p class="auth-switch" id="auth-switch">New to ExecuBrief? <a href="/signup">Create an account</a></p>
+      <p class="auth-footer"><a href="/">Return to the public demo dashboard</a></p>
+    </section>
+    <p class="privacy-note"><span aria-hidden="true">🔒</span> Your uploaded CSVs and custom PDFs are private to your account and are not used by the synthetic public demo.</p>
+  </main>
+</body>
+</html>

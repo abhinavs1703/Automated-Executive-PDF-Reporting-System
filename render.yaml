@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: execubrief
+    runtime: node
+    plan: 1c-2g
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    disk:
+      name: execubrief-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: API_AUTH_TOKEN
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /var/data/private-report.db
+      - key: REPORTS_DIR
+        value: /var/data/private-reports
+      - key: AUTH_DATABASE_PATH
+        value: /var/data/auth.sqlite
+      - key: CUSTOM_DATA_DIR
+        value: /var/data/custom-data
+      - key: DEMO_DATABASE_PATH
+        value: /var/data/demo-report.db
+      - key: DEMO_REPORTS_DIR
+        value: /var/data/demo-reports
+      - key: ENABLE_SCHEDULER
+        value: "false"
+      - key: EMAIL_ENABLED
+        value: "false"
+      - key: PUPPETEER_NO_SANDBOX
+        value: "true"
