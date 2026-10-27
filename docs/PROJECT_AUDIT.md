@@ -1,46 +1,42 @@
-# ExecuBrief — Project audit for the $0 cloud release candidate
+# ExecuBrief — final ZIP audit (Supabase cloud-mode release)
 
-Audit snapshot: 2026-10-17. This audit distinguishes code checks from external deployment verification. The no-card cloud mode is prepared, but the Supabase migration, live account flows and Render deployment still require real provider accounts and acceptance tests.
+Audit date: 2026-10-27. This report distinguishes source-level checks from runtime and hosted verification.
 
-## Existing product and architecture
+## Scope inspected
 
-- Local Windows mode remains Express + SQLite, using `npm start`.
-- Free cloud mode is an additive runtime selected with `npm run start:cloud`; it uses a server-side Supabase REST/Storage adapter and a Supabase SQL migration for account, organisation, session, import and report metadata.
-- The public landing/Overview and synthetic demo remain served by the existing Express application. The private workspace uses cloud-specific handlers; browser clients never receive the Supabase secret key.
-- Account registration/password hashing, session and CSRF protection, Google OAuth state/nonce and ID-token validation are reused. Google sign-in still needs a real OAuth client and live callback test.
-- Private CSVs and generated PDFs use a private Supabase Storage bucket. Analytics databases are reconstructed from organisation CSV objects into a small, short-lived in-memory SQLite cache to avoid downloading all CSVs for each filter request.
-- PDF generation calls the existing Puppeteer/reporting pipeline. Cloud mode limits concurrent PDF rendering to one at a time and applies free-tier file/row/import caps.
+The uploaded `Executive pdf Report.zip` contained the full application source, the Node test suite, Supabase SQL migration, Render Blueprint, setup and deployment docs, and synthetic example CSVs. The ZIP did not contain a real `.env`, Git history, `node_modules`, local SQLite databases, or generated PDF reports. The 1.8 MB `examples/enterprise-demo.csv` is synthetic demo data.
 
-## Safety and isolation decisions
+## Confirmed corrections in this reviewed copy
 
-- The Supabase secret key is server-only, configured in the hosting environment, and absent from `.env.example` as a value.
-- The migration enables RLS on app tables, revokes public/anon/authenticated access and grants access to the service role only. The file bucket is private.
-- CSV object paths and report IDs are validated; report metadata/file access is scoped to the active organisation.
-- An ambiguous database insert timeout no longer blindly deletes a Supabase object that may already be referenced by committed import/report metadata. Cache entries are invalidated after successful imports and released safely.
-- Scheduler and email are disabled in the free Blueprint; public demo reporting does not trigger email or scheduler work.
-- `.gitignore` excludes `.env`, node_modules, local database/WAL files, PDFs, logs and runtime data.
+- Supabase cloud mode remains additive: local Windows mode continues using `npm start` / SQLite, while cloud mode starts with `npm run start:cloud` and uses Supabase PostgREST + private Storage for organisation records, imported CSVs and PDF objects.
+- Fixed Supabase Storage upload metadata: uploads now send `cache-control: max-age=0` rather than `no-store`, matching Supabase's raw upload API expectation for `max-age=<seconds>`.
+- Added a regression test that asserts storage upload content type, upsert header, cache-control metadata, server-side API key header and raw byte body.
+- Tightened `SECURITY DEFINER` SQL functions to explicitly use `search_path = pg_catalog, public`.
+- Corrected misleading API-token comments: `API_AUTH_TOKEN` protects the private/admin `/reports` endpoints; it does not blanket-protect the public demo or the separate session-backed organization routes.
+- Removed known trailing whitespace and the extra README end-of-file blank line.
+- Added `.gitattributes` to keep text files LF-normalized across Windows/Linux/CI and reduce avoidable line-ending noise.
+- Render Blueprint remains `plan: free`, uses `npm run start:cloud`, checks `/health`, has no persistent disk, and keeps email/scheduler disabled by default.
 
-## What is verified in this sandbox
+## Verification performed in this environment
 
-- All source JavaScript files were syntax-checked after adding the cloud mode.
-- `test/cloud-store.test.js` and `test/cloud-deployment-contract.test.js`: **10 passed, 0 failed**, including modern Supabase secret-key header semantics, storage readiness and the PDF temp-directory cold-start regression. The checks cover the server-only Supabase key usage, safe storage paths, redacted remote errors, HTTPS enforcement in production, free/no-disk Render configuration, migration-table/RLS presence and clean secret placeholders.
-- The earlier local-mode release had 225 pass, 0 fail and 1 skip aggregated from individual file runs. That historical result is not a full test result for the new cloud mode.
+- JavaScript syntax check: every `.js` file outside `node_modules` passed `node --check`.
+- Focused dependency-independent tests: **55 passed, 0 failed** across cloud store/deployment contract, CSV parsing/mapping, currency formatting, order validation and Google token verification.
+- One expanded test command included `test/analytics.test.js`, but that test file could not load because `dotenv` was absent in the incomplete installation; it did not fail on an assertion.
+- Archive structure and secret/data exclusions were inspected before packaging.
 
-## Not verified yet (do not treat as production-ready)
+## Verification blocked / not claimed
 
-- The current environment could not complete `npm ci` from the package registry; the local `node_modules` created during the attempt was incomplete. Therefore the full test suite has **not** been rerun on this latest cloud-mode source in this sandbox.
-- The migration has not been applied to a live Supabase project; registration, session RPC, CSV object storage, report object storage and real API responses have not been end-to-end tested against Supabase.
-- The Render service has not been created, and no public health/page/PDF endpoints exist to externally verify yet.
-- The actual deploy host's Puppeteer/Chromium resource use has not been measured. Free Render resources may be too constrained for unusually large reports.
-- Dependency advisory status is unknown until `npm audit --audit-level=moderate` can access the registry.
-- Google OAuth, backup/restore and inactivity resume behaviour still require provider-account verification.
-- No independent penetration test or legal/privacy review has been performed. Use only synthetic data in a public demo.
+- `npm ci` did not finish in this build environment because DNS lookup for `registry.npmjs.org` failed (`EAI_AGAIN`). The resulting `node_modules` was incomplete. Therefore, the complete `npm test` suite and `npm audit` were **not** completed on this uploaded source.
+- The Supabase migration/API/storage round-trip and Render deployment were not exercised against live provider resources in this sandbox. The user must run the complete test suite on Node 24.21.0 with working npm registry access, then validate the hosted flows.
+- Google OAuth needs the user's own OAuth client setup and a real callback test.
+- No independent penetration test or formal production-readiness assessment was performed. Treat this as a portfolio/demo release pending the acceptance checklist, not a guarantee of a foolproof production service.
 
-## Release acceptance requirements
+## Release acceptance checklist
 
-1. Apply `supabase/migrations/0001_execubrief_cloud.sql` once in Supabase SQL Editor and verify all six app tables and private bucket.
-2. On Node 24.21.0, run `npm ci` then `npm test` in a clean copy; fix failures rather than skipping/weakening tests.
-3. Deploy only the checked-in `plan: free` Blueprint and verify Render asks for no card/hold or paid resources; stop if it asks.
-4. Test homepage, `/health`, `/ready`, registration/login/logout, CSV preview/import, analytics filters, real PDF generation, preview/download and two-organisation isolation.
-5. Test a cold start and Supabase resume after pause; export synthetic test data and perform a restore exercise before any real data is considered.
-6. Publish a LinkedIn link only after the actual public URL is live and externally verified.
+1. Extract into a clean folder and run `npm ci` on Node 24.21.0.
+2. Run `npm test`; review every failure and skipped test.
+3. Apply `supabase/migrations/0001_execubrief_cloud.sql` to the intended Supabase project; verify all six tables and the private `execubrief-private` bucket.
+4. Configure `SUPABASE_URL` and `SUPABASE_SECRET_KEY` only in the host's server-side environment; never commit a real secret.
+5. Deploy only the free Blueprint and stop if a payment card, verification hold, paid plan, or paid add-on is required.
+6. Verify `/health`, `/ready`, registration/login, CSV preview/import, analytics filters, real PDF generation, preview/download, and cross-organisation isolation on the actual public host.
+7. Verify persistence after a cold start and document free-tier limitations before posting the URL publicly.

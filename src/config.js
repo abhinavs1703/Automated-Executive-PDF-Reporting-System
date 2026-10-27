@@ -47,8 +47,8 @@ export const config = {
   reportCurrency: process.env.REPORT_CURRENCY || 'USD',
   companyName: process.env.COMPANY_NAME || 'The Little Shop',
 
-  // API protection. When set, every endpoint except /health requires
-  // `Authorization: Bearer <API_AUTH_TOKEN>`.
+  // Private/admin API protection. API_AUTH_TOKEN protects the /reports endpoints;
+  // the public demo and session-backed organisation routes use their own access controls.
   apiAuthToken: process.env.API_AUTH_TOKEN || '',
 
   // Scheduler

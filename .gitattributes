@@ -1,0 +1,7 @@
+# Keep source and deployment files consistent across Windows, Linux, and CI.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.csv text eol=lf

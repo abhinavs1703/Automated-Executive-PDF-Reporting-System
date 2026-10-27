@@ -161,7 +161,7 @@ export class SupabaseCloudStore {
     const encoded = safeObjectPath(objectPath);
     return this.request(new URL(`/storage/v1/object/${encodeURIComponent(this.bucket)}/${encoded}`, this.baseUrl).toString(), {
       method: 'POST', body: bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), responseType: 'json',
-      headers: { 'Content-Type': contentType, 'x-upsert': 'true', 'cache-control': 'no-store' },
+      headers: { 'Content-Type': contentType, 'x-upsert': 'true', 'cache-control': 'max-age=0' },
     });
   }
   async downloadObject(objectPath) {

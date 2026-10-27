@@ -27,6 +27,7 @@ test('cloud migration defines private organisation tables and private file bucke
   }
   assert.match(sql, /values\s*\('execubrief-private',\s*'execubrief-private',\s*false/i);
   assert.match(sql, /grant execute on function public\.execubrief_register_user[\s\S]*?to service_role/i);
+  assert.match(sql, /security definer set search_path = pg_catalog, public/i, 'security-definer functions pin a system-first search path');
 });
 
 test('release template and ignore rules do not publish real secrets or local customer data', async () => {

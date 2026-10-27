@@ -43,6 +43,22 @@ test('readiness verifies both the database API and configured private storage bu
   assert.equal(fetchImpl.calls.every((call) => call.options.headers.apikey === 'sb_secret_example_secret_key'), true);
 });
 
+test('storage upload uses Supabase-compatible cache-control metadata and keeps bytes raw', async () => {
+  const fetchImpl = fakeFetch(async () => jsonResponse({ Key: 'execubrief-private/org/csv/file.csv' }, 200));
+  const store = new SupabaseCloudStore({ url: 'https://example.supabase.co', serviceRoleKey: 'sb_secret_example_secret_key', fetchImpl });
+  const bytes = new Uint8Array([97, 44, 98, 10, 49, 44, 50]);
+  await store.uploadObject('org/csv/file.csv', bytes, 'text/csv');
+  const call = fetchImpl.calls[0];
+  assert.equal(call.options.method, 'POST');
+  assert.equal(call.options.headers['Content-Type'], 'text/csv');
+  assert.equal(call.options.headers['x-upsert'], 'true');
+  assert.equal(call.options.headers['cache-control'], 'max-age=0');
+  assert.equal(call.options.headers.apikey, 'sb_secret_example_secret_key');
+  assert.equal(Object.hasOwn(call.options.headers, 'Authorization'), false);
+  assert.deepEqual(call.options.body, bytes);
+  assert.match(call.url, /storage\/v1\/object\/execubrief-private\/org\/csv\/file.csv/);
+});
+
 test('cloud store rejects unsafe object paths before making a network request', async () => {
   const fetchImpl = fakeFetch(async () => jsonResponse({ ok: true }));
   const store = new SupabaseCloudStore({ url: 'https://example.supabase.co', serviceRoleKey: 'server-only-secret', fetchImpl });

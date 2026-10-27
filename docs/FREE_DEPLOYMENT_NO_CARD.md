@@ -13,12 +13,12 @@ This is a **portfolio/demo deployment**, not a guaranteed always-on production s
 
 The previously published commit may not include this newer cloud migration. Render can only deploy code that has actually been pushed, so merge this release into the existing `main` branch first. Do not create a second repository or force-push history.
 
-1. Download `ExecuBrief-Free-No-Card-Release.zip` into your Downloads folder.
+1. Download `ExecuBrief-Supabase-Audited.zip` into your Downloads folder.
 2. Open PowerShell. Confirm the publishing checkout is the authorised repo and has no uncommitted changes:
 
    ```powershell
    $Repo = "$HOME\ExecuBrief_Git_Publish"
-   $Zip = "$HOME\Downloads\ExecuBrief-Free-No-Card-Release.zip"
+   $Zip = "$HOME\Downloads\ExecuBrief-Supabase-Audited.zip"
    $Stage = "$HOME\ExecuBrief_Free_NoCard_Stage"
    $ExpectedRemote = "https://github.com/abhinavs1703/Automated-Executive-PDF-Reporting-System.git"
 

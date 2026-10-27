@@ -104,7 +104,7 @@ create or replace function public.execubrief_register_user(
   p_user_id uuid, p_organization_id uuid, p_email text, p_name text,
   p_password_salt text, p_password_hash text, p_organization_name text, p_slug text
 ) returns jsonb
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = pg_catalog, public
 as $$
 declare u public.app_users; o public.organizations;
 begin
@@ -128,7 +128,7 @@ create or replace function public.execubrief_google_user(
   p_user_id uuid, p_organization_id uuid, p_email text, p_name text,
   p_google_sub text, p_picture text, p_organization_name text, p_slug text
 ) returns jsonb
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = pg_catalog, public
 as $$
 declare u public.app_users; o public.organizations;
 begin
@@ -170,7 +170,7 @@ $$;
 
 create or replace function public.execubrief_resolve_session(p_token_hash text)
 returns jsonb
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = pg_catalog, public
 as $$
   select jsonb_build_object(
     'csrf_token', s.csrf_token,
